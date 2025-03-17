@@ -3,11 +3,11 @@ import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
+import { ConnectionProps } from './Connection.types';
+import { quadraticCurve } from './Connection.utils';
 import { NODE_POSITION_OFFSET_X } from '../../constants';
 import { StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { fromCanvasCartesianPoint } from '../../utils/coordinates/coordinates';
-import { ConnectionProps } from './Connection.types';
-import { quadraticCurve } from './Connection.utils';
 
 const INPUT_PORT_OFFSET_X = 12;
 const INPUT_PORT_OFFSET_Y = 12;
@@ -121,7 +121,9 @@ export const Connection = observer(<T,>({ output, connection }: ConnectionProps<
     const selectedConnection =
         connection &&
         store.selectedNodes?.flatMap(node => node.connections).includes(connection as NodlConnection<unknown>);
-    const strokeColor = selectedConnection || output ? '#1e62ff' : '#424763';
+    const defaultColor = '#4f60db';
+    const selectedColor = '#ce67df';
+    const strokeColor = selectedConnection || output ? `var(--selected-connection, ${selectedColor})` : `var(--connection, ${defaultColor})`;
 
     return (
         <g>

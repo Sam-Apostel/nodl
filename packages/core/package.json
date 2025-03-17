@@ -5,7 +5,6 @@
     "main": "build/index.js",
     "author": "Emil Widlund",
     "license": "MIT",
-    "private": false,
     "files": [
         "build/*"
     ],

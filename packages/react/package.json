@@ -6,12 +6,12 @@
     "types": "build/index.d.ts",
     "author": "Emil Widlund",
     "license": "MIT",
-    "private": false,
     "files": [
         "build/*"
     ],
     "scripts": {
         "build": "webpack --mode=production --devtool=inline-source-map",
+        "watch": "webpack --watch --mode=development",
         "build:prod": "webpack --mode=production --devtool=source-map",
         "generate:docs": "typedoc ./src/index.ts",
         "prepare": "yarn run build:prod",

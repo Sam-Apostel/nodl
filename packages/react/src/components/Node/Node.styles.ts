@@ -4,9 +4,10 @@ import { NODE_WIDTH } from '../../constants';
 
 export const NODE_CONTENT_PADDING = 12;
 
-export const nodeWrapperStyles = (active: boolean) => css`
-    --node-background: var(--panel-background);
+export const nodeWrapperStyles = (active: boolean, root: boolean) => css`
+    --node-background: ${root ? '#d6e4f4' : 'var(--panel-background)' };
 
+    border: 2px solid #5d5d5d;
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -48,10 +49,17 @@ export const nodeHeaderWrapperStyles = (active: boolean) => css`
 export const nodeHeaderNameWrapperStyle = css`
     display: flex;
     flex-direction: row;
+    align-items: center;
 
-    & > :first-child {
+    & > * {
         margin-right: 8px;
         line-height: 0.6;
+    }
+
+    & > :nth-child(2) {
+        background: #d6d6d6;
+        padding: 5px 8px;
+        border-radius: 5px;
     }
 `;
 
@@ -78,6 +86,7 @@ export const nodeWindowWrapperStyles = css`
     position: relative;
     display: flex;
     flex-direction: column;
+    scale: 1;
 `;
 
 export const nodeContentWrapperStyles = css`

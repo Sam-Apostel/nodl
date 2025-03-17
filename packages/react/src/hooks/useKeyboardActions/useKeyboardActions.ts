@@ -31,10 +31,6 @@ export const useKeyboardActions = (store: CircuitStore) => {
                 key: KeyboardKey.Delete,
                 callback: removeNodes
             },
-            {
-                key: KeyboardKey.Backspace,
-                callback: removeNodes
-            },
 
             /** Select Nodes */
             {

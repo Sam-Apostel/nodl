@@ -35,14 +35,14 @@ export const circuitContainerStyles = css`
     // Colors
     --dark-contrast-background: #12141c;
     --dark-background: #1c1e2a;
-    --panel-background: #242736;
+    --panel-background: #ebedf3;
     --light-background: #fff;
     --neutral-background: #f4f4f4;
     --border-color: #34384e;
     --connection-color: #424763;
     --accent-color: #1e62ff;
     --accent-color-subtle: rgba(30, 98, 255, 0.8);
-    --text-light-color: #fff;
+    --text-light-color: #adadad;
     --text-neutral-color: #7b7e8c;
     --text-dark-color: #000;
 

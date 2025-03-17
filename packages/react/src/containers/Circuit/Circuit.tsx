@@ -2,7 +2,10 @@
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 
+import { circuitContainerStyles, circuitSelectionStyles } from './Circuit.styles';
+import { CircuitProps, NodeWindowResolver } from './Circuit.types';
 import { Canvas } from '../../components/Canvas/Canvas';
 import { Connection } from '../../components/Connection/Connection';
 import { Node } from '../../components/Node/Node';
@@ -10,8 +13,7 @@ import { CANVAS_SIZE } from '../../constants';
 import { useKeyboardActions } from '../../hooks/useKeyboardActions/useKeyboardActions';
 import { StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { normalizeBounds } from '../../utils/bounds/bounds';
-import { circuitContainerStyles, circuitSelectionStyles } from './Circuit.styles';
-import { CircuitProps, NodeWindowResolver } from './Circuit.types';
+import { getOffset } from './util';
 
 const Nodes = observer(({ windowResolver }: { windowResolver?: NodeWindowResolver }) => {
     const { store } = React.useContext(StoreContext);
@@ -56,26 +58,46 @@ export const Circuit = observer(
     React.forwardRef<HTMLDivElement, CircuitProps>((props, ref) => {
         useKeyboardActions(props.store);
 
-        const onMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.nativeEvent.clientX - rect.left;
-            const y = e.nativeEvent.clientY - rect.top;
+        const canvasRef = React.useRef<HTMLDivElement>(null);
 
-            props.store.setMousePosition({ x, y });
+        const [keys, setKeys] = useState({ altKey: false, ctrlKey: false, metaKey: false, shiftKey: false });
 
-            if (props.store.selectionBounds) {
-                const { x, y, width, height } = props.store.selectionBounds;
-
-                const bounds = {
-                    x,
-                    y,
-                    width: width + e.movementX,
-                    height: height + e.movementY
-                };
-
-                props.store.setSelectionBounds(bounds);
-            }
+        useEffect(() => {
+            const abortController = new AbortController();
+            window.addEventListener('keydown', ({ altKey, ctrlKey, metaKey, shiftKey }) => setKeys({ altKey, ctrlKey, metaKey, shiftKey }), { signal: abortController.signal });
+            window.addEventListener('keyup', ({ altKey, ctrlKey, metaKey, shiftKey }) => setKeys({ altKey, ctrlKey, metaKey, shiftKey }), { signal: abortController.signal });
+            return () => abortController.abort();
         }, []);
+
+        const scrollRef = React.useRef<HTMLDivElement>(null);
+
+        const onMouseMove = React.useCallback(
+            (e: React.MouseEvent<HTMLDivElement>) => {
+                const targetIsCanvas = 'id' in e.target && e.target.id === 'connections';
+                const x = targetIsCanvas
+                    ? e.nativeEvent.offsetX
+                    : props.store.mousePosition.x + e.nativeEvent.movementX / props.store.zoomFactor;
+                const y = targetIsCanvas
+                    ? e.nativeEvent.offsetY
+                    : props.store.mousePosition.y + e.nativeEvent.movementY / props.store.zoomFactor;
+
+                if (props.store.selectionBounds) {
+                    const { x: selectionX, y: selectionY, width, height } = props.store.selectionBounds;
+
+                    const bounds = {
+                        x: selectionX,
+                        y: selectionY,
+                        width: width + e.movementX / props.store.zoomFactor,
+                        height: height + e.movementY / props.store.zoomFactor
+                    };
+
+                    props.store.setSelectionBounds(bounds);
+                }
+
+                props.store.setMousePosition({ x, y });
+            },
+            [props]
+        );
 
         const onMouseDown = React.useCallback(({ nativeEvent }: React.MouseEvent<HTMLDivElement>) => {
             if ((nativeEvent.target as HTMLDivElement).id === 'connections') {
@@ -92,6 +114,24 @@ export const Circuit = observer(
             props.store.setDraftConnectionSource(null);
             props.store.setSelectionBounds(null);
         }, []);
+
+        const onScroll = React.useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+            if (!canvasRef.current) return;
+            if (!scrollRef.current) return;
+            if (!keys.metaKey && !keys.ctrlKey) {
+                canvasRef.current.style.left = `${canvasRef.current.style.left.slice(0, -2) - e.deltaX}px`;
+                canvasRef.current.style.top = `${canvasRef.current.style.top.slice(0, -2) - e.deltaY}px`;
+
+                return;
+            }
+
+            props.store.setZoomFactor(props.store.zoomFactor + (e.deltaY * -0.01 * props.store.zoomFactor));
+
+            // given the previous mouse position on the canvas, zoom level and screen size, what is the next offset
+            const newPos = getOffset({ ...props.store.mousePosition }, props.store.zoomFactor, CANVAS_SIZE, scrollRef.current.clientWidth, scrollRef.current.clientHeight);
+            canvasRef.current.style.left = `${newPos.x}px`;
+            canvasRef.current.style.top = `${newPos.y}px`;
+        }, [keys]);
 
         React.useEffect(() => {
             return reaction(
@@ -142,13 +182,15 @@ export const Circuit = observer(
         return (
             <StoreContext.Provider value={{ store: props.store }}>
                 <Canvas
-                    ref={ref}
+                    scrollRef={scrollRef}
+                    ref={canvasRef}
                     className={props.className}
                     css={circuitContainerStyles}
                     size={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUp}
+                    onWheelCapture={onScroll}
                 >
                     <Nodes windowResolver={props.nodeWindowResolver} />
                     <Connections />

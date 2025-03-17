@@ -1,11 +1,12 @@
 import { render, fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
-import { CANVAS_SIZE } from '../../constants';
 import { Canvas } from './Canvas';
 import { CanvasProps } from './Canvas.types';
+import { CANVAS_SIZE } from '../../constants';
 
 const setup = (props?: Partial<CanvasProps>) => {
+    // @ts-ignore
     return render(<Canvas size={{ width: CANVAS_SIZE, height: CANVAS_SIZE }} {...props} />);
 };
 
