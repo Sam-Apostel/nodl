@@ -1,6 +1,5 @@
 module.exports = {
     testEnvironment: 'jsdom',
-    snapshotSerializers: ['@emotion/jest/serializer'],
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1'
     },

@@ -6,7 +6,7 @@ type HoverEventHandler<TElement> = (
 
 export const useHover = <TElement>(onHover?: HoverEventHandler<TElement>) => {
     const [isHovered, setHover] = React.useState(false);
-    const cleanup = React.useRef<((event: React.MouseEvent<TElement>) => void) | void>();
+    const cleanup = React.useRef<undefined | ((event: React.MouseEvent<TElement>) => void) | void>(undefined);
 
     const onMouseEnter = React.useCallback((e: React.MouseEvent<TElement>) => {
         setHover(true);

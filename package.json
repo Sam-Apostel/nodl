@@ -1,6 +1,6 @@
 {
     "name": "nodl",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "A library for building node-based applications.",
     "main": "build/index.js",
     "private": true,
@@ -33,7 +33,7 @@
         "husky": "^8.0.3"
     },
     "workspaces": [
-        "packages/*",
-        "examples/*"
-    ]
+        "packages/*"
+    ],
+    "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

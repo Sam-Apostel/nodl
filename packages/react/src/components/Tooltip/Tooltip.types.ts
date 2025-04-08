@@ -1,15 +1,17 @@
 import * as React from 'react';
 
-export enum TooltipPosition {
-    TOP,
-    TOP_RIGHT,
-    RIGHT,
-    BOTTOM_RIGHT,
-    BOTTOM,
-    BOTTOM_LEFT,
-    LEFT,
-    TOP_LEFT
-}
+export const TooltipPosition = {
+    TOP: 'top',
+    TOP_RIGHT: 'top-right',
+    RIGHT: 'right',
+    BOTTOM_RIGHT: 'bottom-right',
+    BOTTOM: 'bottom',
+    BOTTOM_LEFT: 'bottom-left',
+    LEFT: 'left',
+    TOP_LEFT: 'top-left',
+} as const;
+
+export type TooltipPosition = typeof TooltipPosition[keyof typeof TooltipPosition];
 
 export interface ITooltipNodeProps {
     text: string;

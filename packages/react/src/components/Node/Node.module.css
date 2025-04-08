@@ -1,0 +1,112 @@
+.node {
+    --node-background: var(--panel-background);
+
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: var(--node-width, 260px); /* TODO: move constants.ts to css vars on root */
+    user-select: none;
+    -webkit-user-select: none;
+    z-index: 0;
+    border-radius: 12px;
+    transition: box-shadow 0.15s;
+    font-feature-settings: 'ss02' 1;
+
+
+
+    &:focus {
+        outline: none;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 12px 12px;
+        font-size: var(--font-size-xxs);
+        font-weight: 500;
+        background-color: var(--node-background);
+        line-height: 1;
+        color: var(--text-neutral-color);
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        border-bottom: 2px solid var(--border-color);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+
+        .name {
+            display: flex;
+            flex-direction: row;
+
+            & > :first-child {
+                margin-right: 8px;
+                line-height: 0.6;
+            }
+        }
+
+        .actions {
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+    }
+
+    .window {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        background-color: var(--node-background);
+    }
+
+    &[data-selected="true"] {
+        z-index: 9;
+
+        &:active {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.33);
+        }
+
+        .header {
+            color: var(--text-light-color);
+            border-bottom-color: var(--accent-color);
+        }
+    }
+
+    &:is([data-selected="true"], :hover) .header .actions {
+        opacity: 1;
+    }
+
+    .action {
+        opacity: 1;
+        transition: opacity 0.1s;
+        margin-left: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 6px;
+        background-color: var(--color);
+
+        &:hover {
+            opacity: 0.4;
+        }
+    }
+
+    .ports {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        &[data-type="output"] {
+            align-items: flex-end;
+        }
+    }
+
+}
+

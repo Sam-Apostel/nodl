@@ -1,12 +1,13 @@
 import { Connection, Node } from '@nodl/core';
 
 import { CircuitStore } from '../../stores/CircuitStore/CircuitStore';
+import { ComponentProps } from 'react';
+import * as React from 'react';
 
-export type NodeWindowResolver = (node: Node) => JSX.Element | undefined;
+export type NodeWindowResolver = (node: Node) => React.ReactNode;
 
-export type CircuitProps = {
+export type CircuitProps = ComponentProps<'div'> & {
     store: CircuitStore;
-    className?: string;
     nodeWindowResolver?: NodeWindowResolver;
     onNodeRemoval?(node: Node): void;
     onConnection?(connection: Connection<unknown>): void;

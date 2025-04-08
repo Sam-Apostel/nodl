@@ -1,9 +1,11 @@
 import { Input, Node, Output } from '@nodl/core';
+import * as React from 'react';
 import { DraggableProps } from 'react-draggable';
+
 
 export type NodeProps = {
     node: Node;
-    window?: JSX.Element;
+    window?: React.ReactNode;
     actions?: NodeActionProps[];
     className?: string;
     disabled?: boolean;
@@ -16,5 +18,5 @@ export type NodeActionProps = {
 
 export type NodePortsProps = {
     ports: Input<unknown>[] | Output<unknown>[];
-    isOutputWrapper?: boolean;
+    type: 'input' | 'output';
 };

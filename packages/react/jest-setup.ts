@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { matchers } from '@emotion/jest';
+import matchers from '@testing-library/jest-dom/matchers';
+
 
 expect.extend(matchers);
 
