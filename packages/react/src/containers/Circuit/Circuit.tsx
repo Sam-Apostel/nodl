@@ -1,8 +1,10 @@
-/** @jsxImportSource @emotion/react */
+import clsx from 'clsx';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
+import styles from './Circuit.module.css';
+import { CircuitProps, NodeWindowResolver } from './Circuit.types';
 import { Canvas } from '../../components/Canvas/Canvas';
 import { Connection } from '../../components/Connection/Connection';
 import { Node } from '../../components/Node/Node';
@@ -10,8 +12,6 @@ import { CANVAS_SIZE } from '../../constants';
 import { useKeyboardActions } from '../../hooks/useKeyboardActions/useKeyboardActions';
 import { StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { normalizeBounds } from '../../utils/bounds/bounds';
-import { circuitContainerStyles, circuitSelectionStyles } from './Circuit.styles';
-import { CircuitProps, NodeWindowResolver } from './Circuit.types';
 
 const Nodes = observer(({ windowResolver }: { windowResolver?: NodeWindowResolver }) => {
     const { store } = React.useContext(StoreContext);
@@ -49,22 +49,43 @@ const Connections = observer(() => {
 const Selection = observer(() => {
     const { store } = React.useContext(StoreContext);
 
-    return store.selectionBounds ? <div css={circuitSelectionStyles(normalizeBounds(store.selectionBounds))} /> : null;
+    if (!store.selectionBounds) return null;
+
+    const bounds = normalizeBounds(store.selectionBounds);
+
+    return <div
+        className={styles.circuitSelection}
+        style={{
+            '--x': bounds.x,
+            '--y': bounds.y,
+            '--width': bounds.width,
+            '--height': bounds.height
+        } as React.CSSProperties}
+    />;
 });
 
-export const Circuit = observer(
-    React.forwardRef<HTMLDivElement, CircuitProps>((props, ref) => {
-        useKeyboardActions(props.store);
+export const Circuit = observer((props: CircuitProps) => {
+    const {
+        store,
+        nodeWindowResolver,
+        onNodeRemoval,
+        onConnection,
+        onConnectionRemoval,
+        onSelectionChanged,
+        ...divProps
+    } = props;
+
+    useKeyboardActions(store);
 
         const onMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.nativeEvent.clientX - rect.left;
             const y = e.nativeEvent.clientY - rect.top;
 
-            props.store.setMousePosition({ x, y });
+            store.setMousePosition({ x, y });
 
-            if (props.store.selectionBounds) {
-                const { x, y, width, height } = props.store.selectionBounds;
+            if (store.selectionBounds) {
+                const { x, y, width, height } = store.selectionBounds;
 
                 const bounds = {
                     x,
@@ -73,88 +94,86 @@ export const Circuit = observer(
                     height: height + e.movementY
                 };
 
-                props.store.setSelectionBounds(bounds);
+                store.setSelectionBounds(bounds);
             }
         }, []);
 
         const onMouseDown = React.useCallback(({ nativeEvent }: React.MouseEvent<HTMLDivElement>) => {
             if ((nativeEvent.target as HTMLDivElement).id === 'connections') {
-                props.store.setSelectionBounds({
-                    x: props.store.mousePosition.x,
-                    y: props.store.mousePosition.y,
+                store.setSelectionBounds({
+                    x: store.mousePosition.x,
+                    y: store.mousePosition.y,
                     width: 0,
                     height: 0
                 });
             }
-        }, []);
+        }, [store]);
 
         const onMouseUp = React.useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-            props.store.setDraftConnectionSource(null);
-            props.store.setSelectionBounds(null);
-        }, []);
+            store.setDraftConnectionSource(null);
+            store.setSelectionBounds(null);
+        }, [store]);
 
         React.useEffect(() => {
             return reaction(
-                () => props.store.connections,
+                () => store.connections,
                 (connections, prevConnections) => {
                     const addedConnections = connections.filter(connection => !prevConnections.includes(connection));
                     const removedConnections = prevConnections.filter(connection => !connections.includes(connection));
 
-                    if (addedConnections.length && props.onConnection) {
+                    if (addedConnections.length && onConnection) {
                         for (const connection of addedConnections) {
-                            props.onConnection(connection);
+                            onConnection(connection);
                         }
                     }
 
-                    if (removedConnections.length && props.onConnectionRemoval) {
+                    if (removedConnections.length && onConnectionRemoval) {
                         for (const connection of removedConnections) {
-                            props.onConnectionRemoval(connection);
+                            onConnectionRemoval(connection);
                         }
                     }
                 }
             );
-        }, [props]);
+        }, [store, onConnection, onConnectionRemoval]);
 
         React.useEffect(() => {
             return reaction(
-                () => props.store.nodes,
+                () => store.nodes,
                 (nodes, prevNodes) => {
                     const removedNodes = prevNodes.filter(node => !nodes.includes(node));
 
-                    if (removedNodes.length && props.onNodeRemoval) {
+                    if (removedNodes.length && onNodeRemoval) {
                         for (const node of removedNodes) {
-                            props.onNodeRemoval(node);
+                            onNodeRemoval(node);
                         }
                     }
                 }
             );
-        }, [props]);
+        }, [store, onNodeRemoval]);
 
         React.useEffect(() => {
             return reaction(
-                () => props.store.selectedNodes,
-                (selectedNodes, prevSelectedNodes) => {
-                    props.onSelectionChanged?.(selectedNodes);
+                () => store.selectedNodes,
+                (selectedNodes) => {
+                    onSelectionChanged?.(selectedNodes);
                 }
             );
-        }, [props]);
+        }, [onSelectionChanged, store]);
 
         return (
-            <StoreContext.Provider value={{ store: props.store }}>
+            <StoreContext value={{ store }}>
                 <Canvas
-                    ref={ref}
-                    className={props.className}
-                    css={circuitContainerStyles}
+                    {...divProps}
+                    className={clsx(divProps.className, styles.circuitContainer)}
                     size={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUp}
                 >
-                    <Nodes windowResolver={props.nodeWindowResolver} />
+                    <Nodes windowResolver={nodeWindowResolver} />
                     <Connections />
                     <Selection />
                 </Canvas>
-            </StoreContext.Provider>
+            </StoreContext>
         );
-    })
-);
+    });

@@ -2,10 +2,10 @@ import { Connection } from '@nodl/core';
 import { act, render, fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
-import { CircuitStore, StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { Connection as ConnectionComponent } from './Connection';
 import { Addition } from './Connection.fixture';
 import { ConnectionProps } from './Connection.types';
+import { CircuitStore, StoreContext } from '../../stores/CircuitStore/CircuitStore';
 
 const setup = (store: CircuitStore, props?: Partial<ConnectionProps<unknown>>) => {
     return render(
@@ -76,6 +76,7 @@ describe('Connection', () => {
     it('should render a different color when part of selected connections', () => {
         const result = setup(store, { connection });
 
+        // @ts-expect-error expect is not properly extended
         expect(result.container.getElementsByClassName('connector')[0] as SVGPathElement).toHaveAttribute(
             'stroke',
             '#424763'
@@ -87,6 +88,7 @@ describe('Connection', () => {
 
         const newResult = setup(store, { connection });
 
+        // @ts-expect-error expect is not properly extended
         expect(newResult.container.getElementsByClassName('connector')[0] as SVGPathElement).toHaveAttribute(
             'stroke',
             '#1e62ff'

@@ -1,28 +1,18 @@
-/** @jsxImportSource @emotion/react */
+import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 import Draggable, { DraggableEventHandler } from 'react-draggable';
 
+import styles from './Node.module.css';
+import { NodeActionProps, NodePortsProps, NodeProps } from './Node.types';
 import { NODE_POSITION_OFFSET_X } from '../../constants';
-import { useHover } from '../../hooks/useHover/useHover';
 import { StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { fromCanvasCartesianPoint } from '../../utils/coordinates/coordinates';
 import { Port } from '../Port/Port';
-import {
-    nodeHeaderWrapperStyles,
-    nodeContentWrapperStyles,
-    nodeWrapperStyles,
-    nodePortsWrapperStyles,
-    nodeHeaderActionsStyles,
-    nodeActionStyles,
-    nodeHeaderNameWrapperStyle,
-    nodeWindowWrapperStyles
-} from './Node.styles';
-import { NodeActionProps, NodePortsProps, NodeProps } from './Node.types';
 
-export const Node = observer(({ node, actions, window }: NodeProps) => {
+
+export const Node = observer(({ node, window }: NodeProps) => {
     const ref = React.useRef<HTMLDivElement>(null);
-    const { onMouseEnter, onMouseLeave, isHovered } = useHover();
     const { store } = React.useContext(StoreContext);
 
     React.useEffect(() => {
@@ -75,6 +65,7 @@ export const Node = observer(({ node, actions, window }: NodeProps) => {
     const position = store.nodePositions.get(node.id) || { x: 0, y: 0 };
 
     return (
+        // @ts-expect-error react-draggable hasn't been updated to react 19
         <Draggable
             nodeRef={ref}
             position={fromCanvasCartesianPoint(position.x - NODE_POSITION_OFFSET_X, position.y)}
@@ -83,25 +74,24 @@ export const Node = observer(({ node, actions, window }: NodeProps) => {
         >
             <div
                 ref={ref}
-                css={nodeWrapperStyles(active)}
+                className={styles.node}
+                data-selected={active}
                 onClick={handleOnClick}
                 onFocus={handleOnFocus}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
                 tabIndex={0}
             >
-                <div css={nodeHeaderWrapperStyles(active)} className={'handle'}>
-                    <div css={nodeHeaderNameWrapperStyle}>
+                <div className={clsx('handle', styles.header)}>
+                    <div className={styles.name}>
                         <span>{node.name}</span>
                     </div>
-                    <div css={nodeHeaderActionsStyles(isHovered || active)}>
+                    <div className={styles.actions}>
                         <NodeAction color="#ff4444" onClick={handleRemoveNode} />
                     </div>
                 </div>
-                {window ? <div css={nodeWindowWrapperStyles} children={window} /> : undefined}
-                <div css={nodeContentWrapperStyles}>
-                    <NodePorts ports={Object.values(node.inputs)} />
-                    <NodePorts ports={Object.values(node.outputs)} isOutputWrapper={true} />
+                {window ? <div className={styles.window}>{window}</div> : undefined}
+                <div className={styles.content}>
+                    <NodePorts ports={Object.values(node.inputs)} type="input" />
+                    <NodePorts ports={Object.values(node.outputs)} type="output" />
                 </div>
             </div>
         </Draggable>
@@ -109,14 +99,16 @@ export const Node = observer(({ node, actions, window }: NodeProps) => {
 });
 
 const NodeAction = ({ color = '#fff', onClick }: NodeActionProps) => {
-    return <div css={nodeActionStyles(color)} color={color} onClick={onClick} />;
+    return <div color={color} className={styles.action} style={{
+        '--color': color
+    } as React.CSSProperties} onClick={onClick} />;
 };
 
-const NodePorts = ({ ports, isOutputWrapper }: NodePortsProps) => {
+const NodePorts = ({ ports, type }: NodePortsProps) => {
     return (
-        <div css={nodePortsWrapperStyles(isOutputWrapper)}>
+        <div className={styles.ports} data-type={type}>
             {ports.map(port => (
-                <Port key={port.id} port={port} isOutput={!!isOutputWrapper} />
+                <Port key={port.id} port={port} type={type} />
             ))}
         </div>
     );

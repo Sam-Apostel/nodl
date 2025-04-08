@@ -1,0 +1,81 @@
+.tooltip-container {
+    display: flex;
+
+    .tooltip {
+        --tooltip-background-color: var(--panel-background);
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        padding: 6px 8px;
+        border-radius: 6px;
+        background-color: var(--tooltip-background-color);
+        color: var(--text-light-color);
+        font-size: var(--font-size-xxs);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-feature-settings: 'ss02' 1;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 79;
+        white-space: nowrap;
+        animation: fade 0.2s;
+
+        --offset-general: -10px;
+        --offset-combined-x: calc(var(--offset-general) - calc(var(--offset-x, 0) * 1px));
+        --offset-combined-y: calc(var(--offset-general) - calc(var(--offset-y, 0) * 1px));
+
+        --offset-horizontal: calc(var(--offset-combined-x) - calc(var(--width) * 1px));
+        --offset-vertical: calc(var(--offset-combined-y) - calc(var(--height) * 1px));
+
+        &[data-position='top'] {
+            top: var(--offset-vertical);
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        &[data-position='top-right'] {
+            top: var(--offset-vertical);
+            right: var(--offset-horizontal);
+        }
+
+        &[data-position='right'] {
+            right: var(--offset-horizontal);
+        }
+
+        &[data-position='bottom-right'] {
+            right: var(--offset-horizontal);
+            bottom: var(--offset-vertical);
+        }
+
+        &[data-position='bottom'] {
+            bottom: var(--offset-vertical);
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        &[data-position='bottom-left'] {
+            bottom: var(--offset-vertical);
+            left: var(--offset-horizontal);
+        }
+
+        &[data-position='left'] {
+            left: var(--offset-horizontal);
+        }
+
+        &[data-position='top-left'] {
+            left: var(--offset-horizontal);
+            top: var(--offset-vertical);
+        }
+
+
+    }
+}

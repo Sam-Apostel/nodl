@@ -1,20 +1,21 @@
-/** @jsxImportSource @emotion/react */
 import { Connection, Input, Output } from '@nodl/core';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
+import styles from './Port.module.css';
+import { PortProps } from './Port.types';
 import { useHover } from '../../hooks/useHover/useHover';
 import { StoreContext } from '../../stores/CircuitStore/CircuitStore';
 import { Tooltip } from '../Tooltip/Tooltip';
 import { TooltipPosition } from '../Tooltip/Tooltip.types';
-import { portTypeStyles, portWrapperStyles } from './Port.styles';
-import { PortProps } from './Port.types';
 
-export const Port = observer(<T,>({ port, isOutput }: PortProps<T>) => {
+export const Port = observer(<T,>({ port, type }: PortProps<T>) => {
     const ref = React.useRef<HTMLDivElement>(null);
     const { onMouseEnter, onMouseLeave, isHovered } = useHover();
     const { onMouseEnter: onPortTypeEnter, onMouseLeave: onPortTypeLeave, isHovered: isPortTypeHovered } = useHover();
     const { store } = React.useContext(StoreContext);
+
+    const isOutput = type === 'output';
 
     const tooltipPosition = React.useMemo(() => (isOutput ? TooltipPosition.RIGHT : TooltipPosition.LEFT), [isOutput]);
     const visuallyDisabled = React.useMemo(() => {
@@ -66,25 +67,21 @@ export const Port = observer(<T,>({ port, isOutput }: PortProps<T>) => {
         <Tooltip text={port.type.name} position={tooltipPosition}>
             <div
                 ref={ref}
-                css={portWrapperStyles(
-                    port.connected ||
-                        (!store.draftConnectionSource && isHovered) ||
-                        (!!store.draftConnectionSource && !visuallyDisabled),
-                    isOutput,
-                    visuallyDisabled
-                )}
+                className={styles.port}
+                data-connected={port.connected}
+                data-highlighted={port.connected ||
+                    (!store.draftConnectionSource && isHovered) ||
+                    (!!store.draftConnectionSource && !visuallyDisabled)}
+                aria-disabled={visuallyDisabled}
+                data-hover={isHovered && !visuallyDisabled}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
                 onMouseUp={onMouseUp}
                 onMouseDown={onMouseDown}
             >
                 <div
-                    css={portTypeStyles(
-                        port.connected,
-                        isOutput,
-                        isHovered && !visuallyDisabled,
-                        isPortTypeHovered && !visuallyDisabled
-                    )}
+                    data-hover={isPortTypeHovered && !visuallyDisabled}
+                    className={styles.type}
                     onMouseEnter={onPortTypeEnter}
                     onMouseLeave={onPortTypeLeave}
                     onClick={onClick}

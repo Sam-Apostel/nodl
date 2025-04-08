@@ -1,9 +1,9 @@
-/** @jsxImportSource @emotion/react */
+import clsx from 'clsx';
 import * as React from 'react';
 
-import { useHover } from '../../hooks/useHover/useHover';
-import { tooltipWrapperStyles, tooltipNodeWrapperStyles } from './Tooltip.styles';
+import styles from './Tooltip.module.css';
 import { ITooltipNodeProps, ITooltipProps } from './Tooltip.types';
+import { useHover } from '../../hooks/useHover/useHover';
 
 const TooltipNode = ({ text, position, offset }: ITooltipNodeProps) => {
     const ref = React.useRef<HTMLSpanElement>(null);
@@ -16,7 +16,12 @@ const TooltipNode = ({ text, position, offset }: ITooltipNodeProps) => {
     }, []);
 
     return (
-        <span ref={ref} css={tooltipNodeWrapperStyles(position, dimensions, offset)}>
+        <span ref={ref} className={styles.tooltip} data-position={position} style={{
+            '--offset-x': offset?.x,
+            '--offset-y': offset?.y,
+            '--width': dimensions.width,
+            '--height': dimensions.height,
+        } as React.CSSProperties}>
             {text}
         </span>
     );
@@ -26,7 +31,7 @@ export const Tooltip = ({ children, className, ...tooltipNodeProps }: ITooltipPr
     const { onMouseEnter, onMouseLeave, isHovered } = useHover();
 
     return (
-        <div css={tooltipWrapperStyles} className={className} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <div className={clsx(className, styles.tooltipContainer)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div>{children}</div>
             {isHovered && <TooltipNode {...tooltipNodeProps} />}
         </div>

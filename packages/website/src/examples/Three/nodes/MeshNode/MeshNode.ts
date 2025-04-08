@@ -2,7 +2,7 @@ import { Node, Input, schema } from '@nodl/core';
 import color from 'color';
 import { combineLatest, map } from 'rxjs';
 import * as THREE from 'three';
-import z from 'zod';
+import * as z from 'zod';
 
 import { ColorSchema } from '../../../../schemas/ColorSchema/ColorSchema';
 

@@ -25,6 +25,37 @@ module.exports = env => {
         module: {
             rules: [
                 {
+                    test: /\.module\.css$/,
+                    use: [
+                        'style-loader',
+                        {
+                            loader: "css-modules-dts-loader",
+                            options: {
+                                camelCase: true,
+                                quote: "single",
+                                indentStyle: "space",
+                                indentSize: 2,
+                                mode: "emit",
+                                sort: false,
+                                namedExport: false,
+                            }
+                        },
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                sourceMap: true,
+                                modules: {
+                                    mode: 'pure',
+                                    namedExport: false,
+                                    exportLocalsConvention: "camel-case-only",
+                                    localIdentName: '[name]__[local]--[hash:base64:5]',
+                                },
+                                importLoaders: 1,
+                            }
+                        }
+                    ]
+                },
+                {
                     test: /\.tsx?$/,
                     loader: 'ts-loader'
                 }
